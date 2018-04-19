@@ -162,6 +162,11 @@ class VmwareDrs(PyVmomi):
         if self.state == 'present':
             # Get list of VMs only if state is present
             self.vm_obj_list = self.get_all_vms_info()
+            if not self.vm_obj_list:
+                self.module.fail_json(msg="Virtual machine objects list can be blank which is"
+                                          " required for creating/updating DRS Rule. This can"
+                                          " mean either VM provided are not present or vms"
+                                          " parameter is empty list.")
 
     # Getter
     def get_all_vms_info(self, vms_list=None):
@@ -224,7 +229,7 @@ class VmwareDrs(PyVmomi):
                     rule_name=rule_obj.name,
                     rule_mandatory=rule_obj.mandatory,
                     rule_uuid=rule_obj.ruleUuid,
-                    rule_vms=[vm.name for vm in rule_obj.vm],
+                    rule_vms=[vm.name for vm in rule_obj.vm] if hasattr(rule_obj, 'vm') else [],
                     rule_affinity=True if isinstance(rule_obj, vim.cluster.AffinityRuleSpec) else False,
                     )
 
@@ -247,7 +252,8 @@ class VmwareDrs(PyVmomi):
             # Delete existing rule as we cannot edit it
             changed, result = self.delete(rule_name=self.rule_name)
             if not changed:
-                self.module.fail_json(msg="Failed to delete while updating rule %s due to %s" % (self.rule_name, result))
+                self.module.fail_json(msg="Failed to delete while updating"
+                                          " rule %s due to %s" % (self.rule_name, result))
         changed, result = self.create_rule_spec()
         return changed, result
 
@@ -274,6 +280,11 @@ class VmwareDrs(PyVmomi):
             changed, result = wait_for_task(task)
         except vmodl.fault.InvalidRequest as e:
             result = to_native(e.msg)
+        except vim.fault.NoPermission as no_permission:
+            result = "User %s does not have permission to perform create operation." \
+                     " Please assign %s to user on %s" % (self.params['username'],
+                                                          no_permission.privilegeId,
+                                                          no_permission.object.name)
         except Exception as e:
             result = to_native(e)
 
@@ -302,6 +313,11 @@ class VmwareDrs(PyVmomi):
                 changed, result = wait_for_task(task)
             except vmodl.fault.InvalidRequest as e:
                 result = to_native(e.msg)
+            except vim.fault.NoPermission as no_permission:
+                result = "User %s does not have permission to perform delete operation." \
+                         " Please assign %s to user on %s" % (self.params['username'],
+                                                              no_permission.privilegeId,
+                                                              no_permission.object.name)
             except Exception as e:
                 result = to_native(e)
         else:
