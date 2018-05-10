@@ -1,0 +1,7 @@
+image: akasurde/vcenter-ansible-test
+hello-world:
+  script:
+  - echo "Hello World" > /tmp/hw.txt
+  - cat /tmp/hw.txt
+  tags:
+  - vmware
