@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+#
 # Copyright: (c) 2018, Ansible Project
 # Copyright: (c) 2018, Abhijeet Kasurde <akasurde@redhat.com>
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
@@ -20,9 +21,9 @@ short_description: Gather facts about VM customization specifications
 description:
     - This module can be used to gather facts about customization specifications.
     - All parameters and VMware object names are case sensitive.
-version_added: 2.6
+version_added: 2.8
 author:
-    - Abhijeet Kasurde (@akasurde) <akasurde@redhat.com>
+    - Abhijeet Kasurde (@Akasurde)
 notes:
     - Tested on vSphere 6.0 and 6.5
 requirements:
@@ -39,19 +40,19 @@ extends_documentation_fragment: vmware.documentation
 EXAMPLES = '''
 - name: Gather facts about all customization specification
   vmware_guest_customization_facts:
-    hostname: 192.168.1.209
-    username: administrator@vsphere.local
-    password: vmware
-    validate_certs: False
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: no
   delegate_to: localhost
   register: all_custom_spec_facts
 
 - name: Gather facts about customization specification with the given name
   vmware_guest_customization_facts:
-    hostname: 192.168.1.209
-    username: administrator@vsphere.local
-    password: vmware
-    validate_certs: False
+    hostname: "{{ vcenter_hostname }}"
+    username: "{{ vcenter_username }}"
+    password: "{{ vcenter_password }}"
+    validate_certs: no
     spec_name: custom_linux_spec
   delegate_to: localhost
   register: custom_spec_facts
@@ -110,7 +111,7 @@ class VmwareCustomSpecManger(PyVmomi):
 
     def gather_custom_spec_facts(self):
         """
-        Function to gather facts about customization specifications
+        Gather facts about customization specifications
         """
 
         spec_name = self.params.get('spec_name', None)
@@ -174,7 +175,10 @@ def main():
     argument_spec.update(
         spec_name=dict(type='str'),
     )
-    module = AnsibleModule(argument_spec=argument_spec, supports_check_mode=True)
+    module = AnsibleModule(
+        argument_spec=argument_spec,
+        supports_check_mode=True
+    )
 
     pyv = VmwareCustomSpecManger(module)
     try:
