@@ -102,6 +102,8 @@ Noteworthy module changes
 * The ``win_get_url`` module has removed the deprecated ``skip_certificate_validation`` option, use the standardised
   ``validate_certs`` option instead.
 
+* ``vmware_vm_facts`` used to return dict of dict with virtual machine's facts. Ansible 2.8 and onwards will return list of dict with virtual machine's facts.
+  Please see module ``vmware_vm_facts`` documentation for example.
 
 Plugins
 =======
