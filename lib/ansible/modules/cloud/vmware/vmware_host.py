@@ -263,6 +263,8 @@ class VMwareHost(PyVmomi):
                     # User has not specified SSL Thumbprint for ESXi host,
                     # try to grab it using SSLVerifyFault exception
                     host_connect_spec.sslThumbprint = task_error.thumbprint
+                elif 'already exists' in task_error:
+                    return False, task_error
                 else:
                     self.module.fail_json(msg="Failed to add host %s to vCenter: %s" % (self.esxi_hostname,
                                                                                         to_native(task_error)))
