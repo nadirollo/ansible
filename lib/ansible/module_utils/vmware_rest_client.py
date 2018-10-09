@@ -52,7 +52,7 @@ class VmwareRestClient(object):
 
     def check_required_library(self):
         """
-        Function to check required libraries
+        Check required libraries
 
         """
         if not HAS_REQUESTS:
@@ -71,7 +71,7 @@ class VmwareRestClient(object):
 
     def connect_to_rest(self):
         """
-        Function to connect to server using username and password
+        Connect to server using username and password
 
         """
         session = requests.Session()
@@ -134,3 +134,20 @@ class VmwareRestClient(object):
                                 fallback=(env_fallback, ['VMWARE_VALIDATE_CERTS']),
                                 default=True),
         )
+
+    @staticmethod
+    def search_svc_object_byname(service, svc_obj_name):
+        """
+        Return service object by name
+        Args:
+            service: Service object
+            svc_obj_name: Name of service object to find
+
+        Returns: Service object if found else None
+
+        """
+        for svc_object in service.list():
+            svc_obj = service.get(svc_object)
+            if svc_obj.name == svc_obj_name:
+                return svc_obj
+        return None
